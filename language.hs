@@ -8,7 +8,7 @@ import System.IO.Unsafe
 {-
 <program> -> begin <stmts> end
 <stmts> -> <stmt> | <stmt>;<stmts>
-<stmt> -> <var> = <expr>
+<stmt> -> <var> = <expr> | while <expr> <stmts> | for <stmt> <expr> <stmt> <stmts> | print <expr>
 <var> -> string
 <op> -> + | - | * | / | >=
 <expr> -> <val> | <expr> <op> <expr> | if <expr> then <expr> else <expr>
