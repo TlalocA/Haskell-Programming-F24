@@ -20,6 +20,7 @@ evaluateSS (Seq s ss) env = case evaluateS s env of
 evaluateS :: Stmt -> Env -> Result
 evaluateS (Assign x t e) env = case (evaluate e env, t) of
                                 (ValI vi, TypeI) -> Valid ((x, ValI vi) : env)
+                                (ValI vd, TypeD) -> Valid ((x, ValD vd) : env)
                                 (ValB vb, TypeB) -> Valid $ (x, ValB vb) : env
                                 (ValI _, TypeB) -> Error $ "Type mismatch for " ++ x
                                 (ValB _, TypeI) -> Error $ "Type mismatch for " ++ x
@@ -48,6 +49,16 @@ evaluateOp i1 Gt i2 = ValB (i1 > i2)
 evaluateOp i1 LEq i2 = ValB (i1 <= i2)
 evaluateOp i1 Lt i2 = ValB (i1 < i2)
 
+evaluateOp:: Double -> Op -> Double -> Val
+evaluateOp d1 Add d2 = ValD (d1 + d2)
+evaluateOp d1 Sub d2 = ValD (d1 - d2)
+evaluateOp d1 Mul d2 = ValD (d1 * d2)
+evaluateOp d1 Div d2 = ValD (d1 `div` d2)
+evaluateOp d1 GEq d2 = ValD (d1 >= d2)
+evaluateOp d1 Gt d2 = ValD (d1 > d2)
+evaluateOp d1 LEq d2 = ValD (d1 <= d2)
+evaluateOp d1 Lt d2 = ValD (d1 < d2)
+
 evaluateOp:: Bool -> Op -> Bool -> Val
 evaluateOp b1 AND b2 = ValI (b1 && b2)
 evaluateOp b1 OR b2 = ValI (b1 || b2)
@@ -63,6 +74,7 @@ evaluate (IfElse c e1 e2) env = case evaluate c env of
                                 --ValI i -> error "condition should be a boolean expression"
 evaluate (BinExpr e1 op e2) env = case (evaluate e1 env, evaluate e2 env) of
                                 (ValI i1, ValI i2) -> evaluateOp i1 op i2
+                                (ValD d1, ValD d2) -> evaluateOp d1 op d2
                                 (ValE em1, _) -> ValE em1
                                 (_, ValE em2) -> ValE em2
                                 _ -> ValE "operands should be integer"
@@ -72,8 +84,17 @@ evaluate (Ref x) env = case lookup x env of
 evaluate (App (Func x t e) e2) env = case (evaluate e2 env, t) of
                                         (ValI vi, TypeI) -> evaluate e ((x, ValI vi) : env)
                                         (ValB vb, TypeB) -> evaluate e ((x, ValB vb) : env)
+                                        (ValD vd, TypeD) -> evaluate e ((x, ValD vd) : env)
+
                                         (ValI _, TypeB) -> ValE $ "Type mismatch for " ++ x
+                                        (ValI _, TypeD) -> ValE $ "Type mismatch for " ++ x
+
                                         (ValB _, TypeI) -> ValE $ "Type mismatch for " ++ x
+                                        (ValB _, TypeD) -> ValE $ "Type mismatch for " ++ x
+
+                                        (ValD _, TypeI) -> ValE $ "Type mismatch for " ++ x
+                                        (ValD _, TypeB) -> ValE $ "Type mismatch for " ++ x
+
                                         (ValE s, _) -> ValE s
 evaluate _ env = ValE "undefined" -- Func or App e1 e2 where e1 is not a function
 

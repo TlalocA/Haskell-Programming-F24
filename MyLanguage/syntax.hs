@@ -6,10 +6,10 @@ module Syntax where
 <stmts> -> <stmt> | <stmt>;<stmts>
 <stmt> -> <var> = <expr> | print <expr>
 <var> -> string
-<op> -> + | - | =< | < | > | >= |
+<op> -> + | - | =< | < | > | >= | AND | OR
 <expr> -> <val> | <expr> <op> <expr> | if <expr> then <expr> else <expr>
     | func <var> <expr> |  App <expr> <expr> | Ref <var> 
-    | do <expr> while <expr> 
+    | do <expr> while <expr> | struct?
 <val> -> integers | double | booleans | error
 -}
 
@@ -45,12 +45,18 @@ precedence Sub = 0
 precedence Mul = 1
 precedence Div = 1
 
+-- show :: Expr -> String
+requiresParenth :: Op -> Expr -> Bool
+requiresParenth op (BinExpr _ o2 _) = precedence op < precedence o2 -- 2+3*5
+requiresParenth _ _ = False -- 2 + sqr(5)
+
 instance Show Program where
     show (BeginEnd ss) = "begin\n" ++ show ss ++ "\nend"
 
 instance Show Val where
     show (ValI vi) = show vi
     show (ValB vb) = show vb
+    show (ValD vd) = show vd
     show (ValE em) = "ERR: " ++ em
 
 instance Show Statements where
@@ -82,8 +88,11 @@ instance Show Stmt where
     
 instance Show Expr where
     show (Value x) = show x
-    show (BinExpr e Op ei) = show e ++ show Op ++ show ei ++ "\n"
-    show (IfElse e ei eu) = "If (" ++ show e ++ ") {" ++ show ei "} Else {" ++ show eu ++ "}\n"
+    show (BinExpr e Op ei) = show e ++ show Op ++ show ei then
+        show e ++ " " ++ show Op ++ "(" ++ show ei ")"
+        show e ++ " " ++ show Op ++ " " ++ show ei
+
+    show (IfElse e ei eu) = "If (" ++ show e ++ ") then (" ++ show ei ") Else (" ++ show eu ++ ")\n"
     show (Func x t e) = "(" ++ show x ++ ":" ++ show t ++ ") => {" ++ show e ++ "}\n"
-    show (App e ei) = show e ++ show ei -- fix this
-    show (Ref x) = "&" ++ show x
+    show (App e1 e2) = show e1 ++ "(" ++ show e2 ++ ")"
+    show (Ref x) = x
