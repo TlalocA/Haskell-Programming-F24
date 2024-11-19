@@ -2,8 +2,11 @@ module Examples where
 import Syntax
 
 --import qualified Syntax as S
-e1 :: Expr -- 2 + 3 * 5
+e1 :: Expr -- 2 + 3 * 5 => 2 + (3 * 5)
 e1 = BinExpr (Value (ValI 2)) Add (BinExpr (Value (ValI 3)) Mul (Value (ValI 5))) 
+
+e' :: Expr -- 2 + 3 * 5 => 2 + (3 * 5)
+e' = BinExpr (Value (ValI 2)) Mul (BinExpr (Value (ValI 3)) Add (Value (ValI 5))) 
 
 e2 :: Expr -- if (2>=3) then 5 else false
 e2 = IfElse (BinExpr (Value (ValI 2)) GEq (Value (ValI 3))) (Value (ValI 5)) (Value (ValB False))

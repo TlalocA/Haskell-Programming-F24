@@ -39,7 +39,7 @@ data Op = Add | Sub | Mul | Div | GEq
 
 data Expr = Value Val | BinExpr Expr Op Expr | IfElse Expr Expr Expr | Func Var Type Expr -- expr is the body of the fun
         | App Expr Expr | Ref Var
-    deriving Show
+    --deriving Show
 data Val = ValI Int | ValB Bool | ValE String 
     -- deriving Show
 
@@ -53,6 +53,22 @@ precedence Add = 0
 precedence Sub = 0
 precedence Mul = 1
 precedence Div = 1
+precedence GEq = -1
+
+-- show :: Expr -> String
+requiresParenth :: Op -> Expr -> Bool
+requiresParenth op (BinExpr _ o2 _) = precedence op < precedence o2 -- 2+3*5
+requiresParenth _ _ = False -- 2 + sqr(5)
+
+instance Show Expr where
+    show (Value v) = show v
+    show (IfElse c e1 e2) = "if (" ++ show c ++ ") then " ++ show e1 ++ " else " ++ show e2
+    show (Ref x) = x
+    show (App e1 e2) = show e1 ++ "(" ++ show e2 ++ ")"
+    show (Func x t e) = "\\" ++ x ++ ":" ++ show t ++ " -> " ++ show e
+    show (BinExpr el op er) = if requiresParenth op er then
+                                    show el ++ " " ++ show op ++ " (" ++ show er ++ ")"
+                                    else show el ++ " " ++ show op ++ " " ++ show er
 
 instance Show Program where
     show (BeginEnd ss) = "begin\n" ++ show ss ++ "\nend"
@@ -81,7 +97,7 @@ instance Show Stmt where
     show (Assign x t e) = x ++ ":" ++ show t ++ " = " ++ show e
     show (While e ss) = "while (" ++ show e ++ ")\n" ++ show ss
     show (For si e su ss) = "for (" ++ show si ++ ";" ++ show e ++ ";" ++ show su ++ ")\n" ++ show ss
-    show (Print e) = "print " ++ show 
+    show (Print e) = "print " ++ show e
     
 --instance Show Expr where
     --show (Value val) = show val
