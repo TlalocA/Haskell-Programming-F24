@@ -20,7 +20,7 @@ evaluateSS (Seq s ss) env = case evaluateS s env of
 evaluateS :: Stmt -> Env -> Result
 evaluateS (Assign x t e) env = case (evaluate e env, t) of
                                 (ValI vi, TypeI) -> Valid ((x, ValI vi) : env)
-                                (ValI vd, TypeD) -> Valid ((x, ValD vd) : env)
+                                (ValD vd, TypeD) -> Valid ((x, ValD vd) : env)
                                 (ValB vb, TypeB) -> Valid $ (x, ValB vb) : env
                                 (ValI _, TypeB) -> Error $ "Type mismatch for " ++ x
                                 (ValB _, TypeI) -> Error $ "Type mismatch for " ++ x
@@ -39,29 +39,29 @@ evaluateS (Print e) env = case evaluate e env of
                                         ValE em -> unsafePerformIO(print em >> return (Error em))
                                         v -> unsafePerformIO(print v >> return (Valid env))
 
-evaluateOp:: Int -> Op -> Int -> Val
-evaluateOp i1 Add i2 = ValI (i1 + i2)
-evaluateOp i1 Sub i2 = ValI (i1 - i2)
-evaluateOp i1 Mul i2 = ValI (i1 * i2)
-evaluateOp i1 Div i2 = ValI (i1 `div` i2)
-evaluateOp i1 GEq i2 = ValB (i1 >= i2)
-evaluateOp i1 Gt i2 = ValB (i1 > i2)
-evaluateOp i1 LEq i2 = ValB (i1 <= i2)
-evaluateOp i1 Lt i2 = ValB (i1 < i2)
+evaluateOpInt:: Int -> Op -> Int -> Val
+evaluateOpInt i1 Add i2 = ValI (i1 + i2)
+evaluateOpInt i1 Sub i2 = ValI (i1 - i2)
+evaluateOpInt i1 Mul i2 = ValI (i1 * i2)
+evaluateOpInt i1 Div i2 = ValI (i1 `div` i2)
+evaluateOpInt i1 GEq i2 = ValB (i1 >= i2)
+evaluateOpInt i1 Gt i2 = ValB (i1 > i2)
+evaluateOpInt i1 LEq i2 = ValB (i1 <= i2)
+evaluateOpInt i1 Lt i2 = ValB (i1 < i2)
 
-evaluateOp:: Double -> Op -> Double -> Val
-evaluateOp d1 Add d2 = ValD (d1 + d2)
-evaluateOp d1 Sub d2 = ValD (d1 - d2)
-evaluateOp d1 Mul d2 = ValD (d1 * d2)
-evaluateOp d1 Div d2 = ValD (d1 `div` d2)
-evaluateOp d1 GEq d2 = ValD (d1 >= d2)
-evaluateOp d1 Gt d2 = ValD (d1 > d2)
-evaluateOp d1 LEq d2 = ValD (d1 <= d2)
-evaluateOp d1 Lt d2 = ValD (d1 < d2)
+evaluateOpDoub:: Double -> Op -> Double -> Val
+evaluateOpDoub d1 Add d2 = ValD (d1 + d2)
+evaluateOpDoub d1 Sub d2 = ValD (d1 - d2)
+evaluateOpDoub d1 Mul d2 = ValD (d1 * d2)
+evaluateOpDoub d1 Div d2 = ValD (d1 / d2)
+evaluateOpDoub d1 GEq d2 = ValB (d1 >= d2)
+evaluateOpDoub d1 Gt d2 = ValB (d1 > d2)
+evaluateOpDoub d1 LEq d2 = ValB (d1 <= d2)
+evaluateOpDoub d1 Lt d2 = ValB (d1 < d2)
 
-evaluateOp:: Bool -> Op -> Bool -> Val
-evaluateOp b1 AND b2 = ValI (b1 && b2)
-evaluateOp b1 OR b2 = ValI (b1 || b2)
+evaluateOpBool:: Bool -> Op -> Bool -> Val
+evaluateOpBool b1 AND b2 = ValB (b1 && b2)
+evaluateOpBool b1 OR b2 = ValB (b1 || b2)
 
 evaluate :: Expr -> Env -> Val
 evaluate (Value v) _ = v
@@ -73,8 +73,9 @@ evaluate (IfElse c e1 e2) env = case evaluate c env of
                                 ValE s -> ValE s
                                 --ValI i -> error "condition should be a boolean expression"
 evaluate (BinExpr e1 op e2) env = case (evaluate e1 env, evaluate e2 env) of
-                                (ValI i1, ValI i2) -> evaluateOp i1 op i2
-                                (ValD d1, ValD d2) -> evaluateOp d1 op d2
+                                (ValI i1, ValI i2) -> evaluateOpInt i1 op i2
+                                (ValD d1, ValD d2) -> evaluateOpDoub d1 op d2
+                                (ValB b1, ValB b2) -> evaluateOpBool b1 op b2
                                 (ValE em1, _) -> ValE em1
                                 (_, ValE em2) -> ValE em2
                                 _ -> ValE "operands should be integer"

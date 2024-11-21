@@ -83,16 +83,16 @@ instance Show Type where
 instance Show Stmt where
     show (Assign x t e) = x ++ ":" ++ show t ++ " = " ++ show e
     show (While e ss) = "while (" ++ show e ++ ")\n" ++ show ss
-    show (For si e su ss) = "for (" ++ show si ++ ";" ++ show e ++ ";" ++ show su ++ ")\n" ++ show ss
-    show (Print e) = "print " ++ show 
+    show (For s1 e s2 s3) = "for (" ++ show s1 ++ ";" ++ show e ++ ";" ++ show s2 ++ ")\n" ++ show s3
+    show (Print e) = "print " ++ show e
     
 instance Show Expr where
     show (Value x) = show x
-    show (BinExpr e Op ei) = show e ++ show Op ++ show ei then
-        show e ++ " " ++ show Op ++ "(" ++ show ei ")"
-        show e ++ " " ++ show Op ++ " " ++ show ei
+    show (BinExpr el op er) = if requiresParenth op er then
+        show el ++ " " ++ show op ++ " (" ++ show er ++ ")"
+        else show el ++ " " ++ show op ++ " " ++ show er
 
-    show (IfElse e ei eu) = "If (" ++ show e ++ ") then (" ++ show ei ") Else (" ++ show eu ++ ")\n"
+    show (IfElse c e1 e2) = "if (" ++ show c ++ ") then " ++ show e1 ++ " else " ++ show e2
     show (Func x t e) = "(" ++ show x ++ ":" ++ show t ++ ") => {" ++ show e ++ "}\n"
     show (App e1 e2) = show e1 ++ "(" ++ show e2 ++ ")"
     show (Ref x) = x
