@@ -66,3 +66,26 @@ sF = For
 
 progF :: Program
 progF = BeginEnd (End sF)
+
+-- My Examples
+
+-- AND
+b1 :: Expr
+b1 = BinExpr (Value (ValB True)) AND (Value (ValB True)) -- True
+
+b2 :: Expr
+b2 = BinExpr (Value (ValB True)) AND (Value (ValB False)) -- False
+
+b3 :: Expr
+b3 = BinExpr (Value (ValB False)) AND (Value (ValB False)) -- True
+
+-- OR
+c1 :: Expr
+c1 = BinExpr (Value (ValB True)) OR (Value (ValB True)) -- True
+
+c2 :: Expr
+c2 = BinExpr (Value (ValB True)) OR (Value (ValB False)) -- True
+
+c3 :: Expr
+c3 = BinExpr (Value (ValB False)) OR (Value (ValB False)) -- False
+
