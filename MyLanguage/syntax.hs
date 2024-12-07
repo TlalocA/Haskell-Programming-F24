@@ -6,10 +6,10 @@ module Syntax where
 <stmts> -> <stmt> | <stmt>;<stmts>
 <stmt> -> <var> = <expr> | print <expr>
 <var> -> string
-<op> -> + | - | =< | < | > | >= | AND | OR
+<op> -> + | - | * | / | % | =< | < | > | >= | AND | OR
 <expr> -> <val> | <expr> <op> <expr> | if <expr> then <expr> else <expr>
     | func <var> <expr> |  App <expr> <expr> | Ref <var> 
-    | do <expr> while <expr> | struct?
+    
 <val> -> integers | double | booleans | error
 -}
 
@@ -27,10 +27,10 @@ type Var = String
 
 data Type = TypeI | TypeB | TypeD
 
-data Op = Add | Sub | Mul | Div | GEq | Gt | LEq | Lt | AND | OR
+data Op = Add | Sub | Mul | Div | Mod | Exp | GEq | Gt | LEq | Lt | AND | OR
 
 data Expr = Value Val | BinExpr Expr Op Expr | IfElse Expr Expr Expr | Func Var Type Expr -- expr is the body of the fun
-        | App Expr Expr | Ref Var
+        | App Expr Expr | Ref Var 
     --deriving Show
 data Val = ValI Int | ValB Bool | ValD Double | ValE String 
 
@@ -44,6 +44,8 @@ precedence Add = 0
 precedence Sub = 0
 precedence Mul = 1
 precedence Div = 1
+precedence Mod = 1
+precedence Exp = 2
 
 -- show :: Expr -> String
 requiresParenth :: Op -> Expr -> Bool
@@ -68,10 +70,14 @@ instance Show Op where
     show Sub = "-"
     show Mul = "*"
     show Div = "/"
+    show Mod = "%"
+    show Exp = "**"
+    -- =< | < | > | >=
     show GEq = ">="
     show Gt = ">"
     show LEq = "<="
     show Lt = "<"
+    -- bool operations
     show AND = "&&"
     show OR = "||"
 

@@ -39,26 +39,36 @@ evaluateS (Print e) env = case evaluate e env of
                                         ValE em -> unsafePerformIO(print em >> return (Error em))
                                         v -> unsafePerformIO(print v >> return (Valid env))
 
+-- eval for int
 evaluateOpInt:: Int -> Op -> Int -> Val
 evaluateOpInt i1 Add i2 = ValI (i1 + i2)
 evaluateOpInt i1 Sub i2 = ValI (i1 - i2)
 evaluateOpInt i1 Mul i2 = ValI (i1 * i2)
 evaluateOpInt i1 Div i2 = ValI (i1 `div` i2)
+evaluateOpInt i1 Mod i2 = ValI (i1 `mod` i2)
+evaluateOpInt i1 Exp i2 = ValI (i1 ^ i2)
+
+-- =< | < | > | >=
 evaluateOpInt i1 GEq i2 = ValB (i1 >= i2)
 evaluateOpInt i1 Gt i2 = ValB (i1 > i2)
 evaluateOpInt i1 LEq i2 = ValB (i1 <= i2)
 evaluateOpInt i1 Lt i2 = ValB (i1 < i2)
 
+-- eval for doubles
 evaluateOpDoub:: Double -> Op -> Double -> Val
 evaluateOpDoub d1 Add d2 = ValD (d1 + d2)
 evaluateOpDoub d1 Sub d2 = ValD (d1 - d2)
 evaluateOpDoub d1 Mul d2 = ValD (d1 * d2)
 evaluateOpDoub d1 Div d2 = ValD (d1 / d2)
+evaluateOpDoub d1 Exp d2 = ValD (d1 ** d2)
+
+-- =< | < | > | >=
 evaluateOpDoub d1 GEq d2 = ValB (d1 >= d2)
 evaluateOpDoub d1 Gt d2 = ValB (d1 > d2)
 evaluateOpDoub d1 LEq d2 = ValB (d1 <= d2)
 evaluateOpDoub d1 Lt d2 = ValB (d1 < d2)
 
+-- eval for bool
 evaluateOpBool:: Bool -> Op -> Bool -> Val
 evaluateOpBool b1 AND b2 = ValB (b1 && b2)
 evaluateOpBool b1 OR b2 = ValB (b1 || b2)
