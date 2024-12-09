@@ -8,9 +8,13 @@ module Syntax where
 <var> -> string
 <op> -> + | - | * | / | % | =< | < | > | >= | AND | OR
 <expr> -> <val> | <expr> <op> <expr> | if <expr> then <expr> else <expr>
-    | func <var> <expr> |  App <expr> <expr> | Ref <var> 
-    
-<val> -> integers | double | booleans | error
+    | func <var> <expr> |  App <expr> <expr> | Ref <var> | Neg <expr> | NegBool <expr>
+    | Let <var> <expr> in <expr>
+<val> -> integers | double | booleans | String |  error
+
+-- Added: | =< | < | > | >= | AND | OR | --
+-- Added | Neg <expr> | NegBool <expr> | Let <var> in <expr> <expr> |--
+-- Added: | String | --
 -}
 
 newtype Program = BeginEnd Statements
@@ -25,14 +29,18 @@ data Stmt = Assign Var Type Expr
 -- | IfElS Expr Statements Statements
 type Var = String
 
-data Type = TypeI | TypeB | TypeD
+data Type = TypeI | TypeB | TypeD | TypeS
 
 data Op = Add | Sub | Mul | Div | Mod | Exp | GEq | Gt | LEq | Lt | AND | OR
 
 data Expr = Value Val | BinExpr Expr Op Expr | IfElse Expr Expr Expr | Func Var Type Expr -- expr is the body of the fun
         | App Expr Expr | Ref Var 
+        -- negation operator: turns numbers to negative
+        | Neg Expr | NegBool Expr
+        -- let statement
+        | Let Var Expr Expr
     --deriving Show
-data Val = ValI Int | ValB Bool | ValD Double | ValE String 
+data Val = ValI Int | ValB Bool | ValD Double | ValE String | ValS String
 
 type Env = [(Var, Val)]
 
@@ -59,6 +67,7 @@ instance Show Val where
     show (ValI vi) = show vi
     show (ValB vb) = show vb
     show (ValD vd) = show vd
+    show (ValS s) = show s
     show (ValE em) = "ERR: " ++ em
 
 instance Show Statements where
@@ -102,3 +111,12 @@ instance Show Expr where
     show (Func x t e) = "(" ++ show x ++ ":" ++ show t ++ ") => {" ++ show e ++ "}\n"
     show (App e1 e2) = show e1 ++ "(" ++ show e2 ++ ")"
     show (Ref x) = x
+    
+    -- show negation
+    show (Neg x) = "-(" ++ show x ++ ")"
+    show (NegBool x) = "!(" ++ show x ++ ")"
+
+    -- show let
+    show (Let x e1 e2) = "let " ++ x ++ " = " ++ show e1 ++ " in " ++ show e2
+
+    

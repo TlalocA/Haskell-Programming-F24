@@ -6,7 +6,8 @@ e1 :: Expr -- 2 + 3 * 5
 e1 = BinExpr (Value (ValI 2)) Add (BinExpr (Value (ValI 3)) Mul (Value (ValI 5))) 
 
 e2 :: Expr -- if (2>=3) then 5 else false
-e2 = IfElse (BinExpr (Value (ValI 2)) GEq (Value (ValI 3))) (Value (ValI 5)) (Value (ValB False))
+e2 = IfElse (BinExpr (Value (ValI 2)) LEq (Value (ValI 3))) (Value (ValI 5)) (Value (ValB False)) -- less than
+--e2 = IfElse (BinExpr (Value (ValI 2)) GEq (Value (ValI 3))) (Value (ValI 5)) (Value (ValB False))
 
 e3:: Expr -- 2
 e3 = Value (ValI 2)
@@ -26,19 +27,57 @@ e8 = Func "A" TypeI e6
 e7 :: Expr
 e7 = App e8 (Value (ValB False))
 
+-- AND
+b1 :: Expr
+b1 = BinExpr (Value (ValB True)) AND (Value (ValB True)) -- True
+
+b2 :: Expr
+b2 = BinExpr (Value (ValB True)) AND (Value (ValB False)) -- False
+
+b3 :: Expr
+b3 = BinExpr (Value (ValB False)) AND (Value (ValB False)) -- True
+
+-- OR
+b4 :: Expr
+b4 = BinExpr (Value (ValB True)) OR (Value (ValB True)) -- True
+
+b5 :: Expr
+b5 = BinExpr (Value (ValB True)) OR (Value (ValB False)) -- True
+
+b6 :: Expr
+b6 = BinExpr (Value (ValB False)) OR (Value (ValB False)) -- False
+
+-- Let
+testLet :: Expr
+testLet = Let "A" (Value (ValI 7)) (e5)
+
+testConcan :: Expr
+testConcan = BinExpr (Value (ValS "Hello")) Add (Value (ValS "World!"))
+
+testNeg :: Expr
+testNeg = Neg (Value (ValI 7))
+
+testNegB :: Expr
+testNegB = NegBool (Value (ValB True))
+
 s :: Stmt
-s = Assign "X" TypeI e7
+s = Assign "X" TypeB b5
+-- s = Assign "X" TypeI e7
 
 p1 = BeginEnd (End s)
 
 s1 :: Stmt
-s1 = Assign "A" TypeI (Value (ValI 5))
+s1 = Assign "A" TypeB (Value (ValB True))
+-- s1 = Assign "A" TypeI (Value (ValI 5))
 
 s2 :: Stmt
-s2 = Assign "B" TypeI (BinExpr (Ref "A") Add (Value (ValI 5)))
+s2 = Assign "B" TypeB (BinExpr (Ref "A") AND (Value (ValB False)))
+-- s2 = Assign "B" TypeI (BinExpr (Ref "A") Add (Value (ValI 5)))
 
 s3 :: Stmt
-s3 = Assign "C" TypeI (BinExpr (Ref "A") Add (Ref "B"))
+-- s3 = Let "A" (Value (ValB False)) (BinExpr (Ref "A") OR (Ref "B"))
+s3 = Assign "C" TypeB (BinExpr (Ref "A") OR (Ref "B"))
+-- s3 = Assign "C" TypeI (BinExpr (Ref "A") Add (Ref "B"))
 
 ss :: Statements
 ss = Seq s1 (Seq s2 (End (Print e3)))
@@ -66,26 +105,3 @@ sF = For
 
 progF :: Program
 progF = BeginEnd (End sF)
-
--- My Examples
-
--- AND
-b1 :: Expr
-b1 = BinExpr (Value (ValB True)) AND (Value (ValB True)) -- True
-
-b2 :: Expr
-b2 = BinExpr (Value (ValB True)) AND (Value (ValB False)) -- False
-
-b3 :: Expr
-b3 = BinExpr (Value (ValB False)) AND (Value (ValB False)) -- True
-
--- OR
-c1 :: Expr
-c1 = BinExpr (Value (ValB True)) OR (Value (ValB True)) -- True
-
-c2 :: Expr
-c2 = BinExpr (Value (ValB True)) OR (Value (ValB False)) -- True
-
-c3 :: Expr
-c3 = BinExpr (Value (ValB False)) OR (Value (ValB False)) -- False
-

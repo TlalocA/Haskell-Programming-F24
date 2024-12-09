@@ -21,9 +21,21 @@ evaluateS :: Stmt -> Env -> Result
 evaluateS (Assign x t e) env = case (evaluate e env, t) of
                                 (ValI vi, TypeI) -> Valid ((x, ValI vi) : env)
                                 (ValD vd, TypeD) -> Valid ((x, ValD vd) : env)
-                                (ValB vb, TypeB) -> Valid $ (x, ValB vb) : env
+                                (ValB vb, TypeB) -> Valid $ (x, ValB vb) : env -- bool specific
+                                (ValS vs, TypeS) -> Valid ((x, ValS vs) : env) -- for string
+
                                 (ValI _, TypeB) -> Error $ "Type mismatch for " ++ x
+                                (ValI _, TypeD) -> Error $ "Type mismatch for " ++ x
+                                (ValI _, TypeS) -> Error $ "Type mismatch for " ++ x
+                                
                                 (ValB _, TypeI) -> Error $ "Type mismatch for " ++ x
+                                (ValB _, TypeD) -> Error $ "Type mismatch for " ++ x
+                                (ValB _, TypeS) -> Error $ "Type mismatch for " ++ x
+
+                                (ValD _, TypeI) -> Error $ "Type mismatch for " ++ x
+                                (ValD _, TypeB) -> Error $ "Type mismatch for " ++ x
+                                (ValD _, TypeS) -> Error $ "Type mismatch for " ++ x
+                                
                                 (ValE s, _) -> Error s
 evaluateS (While e ss) env = case evaluate e env of 
                                 ValE em -> Error em
@@ -73,6 +85,10 @@ evaluateOpBool:: Bool -> Op -> Bool -> Val
 evaluateOpBool b1 AND b2 = ValB (b1 && b2)
 evaluateOpBool b1 OR b2 = ValB (b1 || b2)
 
+-- eval for string
+evaluateOpString:: String -> Op -> String -> Val
+evaluateOpString s1 Add s2 = ValS (s1 ++ s2) -- concatenation
+
 evaluate :: Expr -> Env -> Val
 evaluate (Value v) _ = v
 evaluate (IfElse c e1 e2) env = case evaluate c env of
@@ -86,6 +102,7 @@ evaluate (BinExpr e1 op e2) env = case (evaluate e1 env, evaluate e2 env) of
                                 (ValI i1, ValI i2) -> evaluateOpInt i1 op i2
                                 (ValD d1, ValD d2) -> evaluateOpDoub d1 op d2
                                 (ValB b1, ValB b2) -> evaluateOpBool b1 op b2
+                                (ValS s1, ValS s2) -> evaluateOpString s1 op s2
                                 (ValE em1, _) -> ValE em1
                                 (_, ValE em2) -> ValE em2
                                 _ -> ValE "operands should be integer"
@@ -107,5 +124,21 @@ evaluate (App (Func x t e) e2) env = case (evaluate e2 env, t) of
                                         (ValD _, TypeB) -> ValE $ "Type mismatch for " ++ x
 
                                         (ValE s, _) -> ValE s
+
+evaluate (Neg e) env = case evaluate e env of
+                            ValI vi -> ValI (-vi)
+                            ValD vd -> ValD (-vd)
+                            ValE em -> ValE em
+                            _ -> ValE "Cannot negate value; numerical values only!"
+
+evaluate (NegBool e) env = case evaluate e env of
+                            ValB vb -> ValB (not vb)
+                            _ -> ValE "Cannot negate value, boolean values only!"
+
+evaluate (Let x e1 e2) env =
+                            let val = evaluate e1 env -- declare new env
+                            -- ":" operator adds pair to env
+                            in evaluate e2 ((x, val) : env) -- changes the value in original env with new env
+
 evaluate _ env = ValE "undefined" -- Func or App e1 e2 where e1 is not a function
 
