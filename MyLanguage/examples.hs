@@ -54,11 +54,20 @@ testLet = Let "A" (Value (ValI 7)) (e5)
 testConcan :: Expr
 testConcan = BinExpr (Value (ValS "Hello")) Add (Value (ValS "World!"))
 
+testString :: Expr
+testString = (Value (ValS "Goodbye"))
+
 testNeg :: Expr
 testNeg = Neg (Value (ValI 7))
 
 testNegB :: Expr
 testNegB = NegBool (Value (ValB True))
+
+d1 :: Expr -- 5.5 + 2.5 - 1.0
+d1 = BinExpr (BinExpr (Value (ValD 5.5)) Add (Value (ValD 2.5))) Sub (Value (ValD 1.0))
+
+exp1 :: Expr -- 5.5 + 2.5 - 1.0
+exp1 = BinExpr (BinExpr (Value (ValI 10)) Mod (Value (ValI 5))) Sub (Value (ValI 1))
 
 s :: Stmt
 s = Assign "X" TypeB b5
@@ -105,3 +114,4 @@ sF = For
 
 progF :: Program
 progF = BeginEnd (End sF)
+

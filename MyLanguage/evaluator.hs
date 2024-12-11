@@ -136,9 +136,9 @@ evaluate (NegBool e) env = case evaluate e env of
                             _ -> ValE "Cannot negate value, boolean values only!"
 
 evaluate (Let x e1 e2) env =
-                            let val = evaluate e1 env -- declare new env
-                            -- ":" operator adds pair to env
-                            in evaluate e2 ((x, val) : env) -- changes the value in original env with new env
+                            let val = evaluate e1 env -- declare new env, creats val
+                            -- ":" operator essentially adds/binds val to env
+                            in evaluate e2 ((x, val) : env) -- changes the value in original env with new env (extends rather than replaces)
 
 evaluate _ env = ValE "undefined" -- Func or App e1 e2 where e1 is not a function
 

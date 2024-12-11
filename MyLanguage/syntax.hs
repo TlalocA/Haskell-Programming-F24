@@ -14,7 +14,7 @@ module Syntax where
 
 -- Added: | =< | < | > | >= | AND | OR | --
 -- Added | Neg <expr> | NegBool <expr> | Let <var> in <expr> <expr> |--
--- Added: | String | --
+-- Added:| Double | String | --
 -}
 
 newtype Program = BeginEnd Statements
@@ -111,7 +111,7 @@ instance Show Expr where
     show (Func x t e) = "(" ++ show x ++ ":" ++ show t ++ ") => {" ++ show e ++ "}\n"
     show (App e1 e2) = show e1 ++ "(" ++ show e2 ++ ")"
     show (Ref x) = x
-    
+
     -- show negation
     show (Neg x) = "-(" ++ show x ++ ")"
     show (NegBool x) = "!(" ++ show x ++ ")"
